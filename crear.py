@@ -145,6 +145,11 @@ def configurar_redes(n: int):
         subprocess.run(["lxc", "network", "attach", "lxdbr0", "lb", "eth1"])
         subprocess.run(["lxc", "config", "device", "set", "lb", "eth1", "ipv4.address", "134.3.0.10"])
     
+        # P2: Base de datos: que se configure con direccion IP
+        logging.info("Configurando la red para la base de datos...")
+        subprocess.run(["lxc", "network", "attach", "lxdbr1", "db", "eth0"])
+        subprocess.run(["lxc", "config", "device", "set", "db", "eth0", "ipv4.address", "134.3.0.20"])
+
     except subprocess.CalledProcessError as e:
         logging.error(f"Error al configurar las interfaces de red: {e}")
         return
