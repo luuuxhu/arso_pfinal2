@@ -31,4 +31,4 @@ def instalar_app_en_servidores():
         subprocess.run(["lxc", "exec", servidor, "--", "/root/install.sh"])
         subprocess.run(["lxc", "restart", servidor]) 
         subprocess.run(["lxc", "exec", servidor, "--", "forever", "start", "app/rest_server.js"]) 
-        # abrir  http://10.0.0.servidor(11):8001 -> http://10.0.0.11:8001
+        # abrir  http://134.3.0.servidor(11):8001 -> http://134.3.0.11:8001
