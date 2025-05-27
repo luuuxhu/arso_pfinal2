@@ -22,19 +22,12 @@ def configurar_servidores(n): # node.js
     """
 
     
-## ESTO YA LO HA HECHO CHAT Y HAY QUE REVISAR
     # Configurar base de datos en contenedor db 
     print(f"Configurando base de datos en MongoDB...")
     subprocess.run(["lxc", "file", "push", "install.sh", "db/root/"])
     subprocess.run(["lxc", "exec", "db", "--", "bash", "/root/install.sh"])
 
-
-# LO DEL HAPROXY HAY QUE VERLO, PORQUE CREO QUE HAY QUE EDITAR EL ARCHIVO Y SUPONGO QUE SE PUEDE HACER MANUALMENTE O DESDE COMANDOS.
-
-    # Configurar balanceador (con HAProxy)  
-    print(f"Configurando balanceador lb..")
-    subprocess.run(["lxc", "file", "push", "haproxy.cfg", "lb/etc/haproxy/haproxy.cfg"])
-    subprocess.run(["lxc", "exec", "lb", "--", "systemctl", "restart", "haproxy"])   
+       
 
     try:
         subprocess.run(["lxc", "exec", "db", "--", "systemctl", "restart", "mongodb"], check=True)
@@ -68,6 +61,7 @@ def configurar_basedatos(local=True, ip_remota=None):
         ])
         subprocess.run(["lxc", "restart", nombre]) 
     else: logging.error(f"El contenedor {nombre} no existe. No se puede configurar.")
+
 
 
 
@@ -109,3 +103,65 @@ def configurar_basedatos(local=True, ip_remota=None):
         
     # except subprocess.CalledProcessError as e:
     #     logging.error(f"Error al configurar la base de datos: {e}")
+
+
+def configurar_balanceador(): 
+
+    # Configurar balanceador (con HAProxy)  
+    print(f"Configurando balanceador lb..")
+    subprocess.run(["lxc", "exec", "lb", "bash"])
+    # Asegurar que HAProxy esté instalado
+    subprocess.run(["lxc", "exec", "lb", "--", "apt", "update"])
+    subprocess.run(["lxc", "exec", "lb", "--", "apt", "install", "-y", "haproxy"])
+
+
+
+def configurar_haproxy(num_servidores):
+    """Configura HAProxy dinámicamente según el número de servidores"""
+
+    # 1. Generar configuración de servidores dinámicamente
+    servidores_config = "\n".join([
+        f"    server s{i} 134.3.0.1{i}:8001 check"
+        for i in range(1, num_servidores + 1)
+    ])
+
+    # 2. Configuración completa a inyectar
+    nueva_config = f"""
+frontend http_front
+    bind *:80
+    default_backend nodejs_servers
+
+backend nodejs_servers
+    balance roundrobin
+    {servidores_config}
+    option httpchk
+"""
+
+    # 3. Modificar directamente el archivo en el contenedor
+    subprocess.run([
+        "lxc", "exec", "lb", "--", "sh", "-c",
+        f"cat >> /etc/haproxy/haproxy.cfg << 'EOF'\n{nueva_config}\nEOF"
+    ])
+
+    # 4. Reiniciar HAProxy
+    # subprocess.run(["lxc", "exec", "lb", "restart", "haproxy"])
+    
+    subprocess.run(["service", "haproxy", "start"])
+
+
+
+
+# esto siguiente no se de que serviria la verdad
+    # subprocess.run(["lxc", "file", "push", "haproxy.cfg", "lb/etc/haproxy/haproxy.cfg"])
+    # subprocess.run(["lxc", "exec", "lb", "--", "systemctl", "restart", "haproxy"])
+
+
+
+
+
+
+    
+    
+
+
+
