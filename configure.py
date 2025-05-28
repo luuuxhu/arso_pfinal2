@@ -3,6 +3,8 @@ import logging
 import sys
 import time
 from funciones_utiles import existe_contenedor
+from instalar_node_servidores import instalar_app_en_servidores
+
 
 # Configuración de logging
 logging.basicConfig(
@@ -16,26 +18,9 @@ filemode='a'
 ARCHIVO_CONFIG = "servidores.txt"
 INSTALL_SCRIPT = "install.sh"
 
-def configurar_servidores(n): # node.js
-    """
-    Configura los servidores s1..sn con Node.js y la aplicación web
-    """
 
-    
-    # Configurar base de datos en contenedor db 
-    print(f"Configurando base de datos en MongoDB...")
-    subprocess.run(["lxc", "file", "push", "install.sh", "db/root/"])
-    subprocess.run(["lxc", "exec", "db", "--", "bash", "/root/install.sh"])
-
-       
-
-    try:
-        subprocess.run(["lxc", "exec", "db", "restart", "mongodb"], check=True)
-    except subprocess.CalledProcessError:
-        logging.error("¡Error al reiniciar MongoDB!")
-
-
-def configurar_basedatos(local=True, ip_remota=None):
+# 1. instalar y configurar mongoDB en el contenedor "db"
+def configurar_basedatos():
     """
     Configura la base de datos MongoDB
     local: True para instalación local, False para remota
@@ -47,7 +32,7 @@ def configurar_basedatos(local=True, ip_remota=None):
     if existe_contenedor(nombre):
         # Instalar MongoDB
         logging.info("Instalando MongoDB...")
-        subprocess.run(["lxc", "exec", nombre, "--", "apt", "update"]) # si no funciona es SU CULPA
+        # subprocess.run(["lxc", "exec", nombre, "--", "apt", "update"]) # si no funciona es SU CULPA
         subprocess.run(["lxc", "exec", nombre, "--", "apt", "install", "-y", "mongodb"])
 
         # Configurar MongoDB (bind IP y reinicio)
@@ -63,59 +48,37 @@ def configurar_basedatos(local=True, ip_remota=None):
     else: logging.error(f"El contenedor {nombre} no existe. No se puede configurar.")
 
 
+# 2. Configurar N servidores con node.js y preparar la app web
+def configurar_servidores(n): # node.js
+    """
+    Configura los servidores s1..sn con Node.js y la aplicación web
+    """
 
+    
+    # Configurar base de datos en contenedor db 
+    print(f"Configurando base de datos en MongoDB...")
+    subprocess.run(["lxc", "file", "push", "install.sh", "db/root/"])
+    subprocess.run(["lxc", "exec", "db", "--", "bash", "/root/install.sh"])
 
+    try:
+        subprocess.run(["lxc", "exec", "db", "restart", "mongodb"], check=True)
+    except subprocess.CalledProcessError:
+        logging.error("¡Error al reiniciar MongoDB!")
 
-    # PARA EL REMOTO, YA LO VEREMOS :D
-    # try:
-    #     logging.info(f"Configurando base de datos MongoDB ({'local' if local else 'remota'})...")
+    instalar_app_en_servidores()
 
-        
-    #     # Configurar MongoDB para aceptar conexiones remotas
-    #     config_mongo = """
-    #     storage:
-    #       dbPath: /var/lib/mongodb
-    #       journal:
-    #         enabled: true
-        
-    #     systemLog:
-    #       destination: file
-    #       logAppend: true
-    #       path: /var/log/mongodb/mongod.log
-        
-    #     net:
-    #       port: 27017
-    #       bindIp: 0.0.0.0
-    #     """
-        
-    #     subprocess.run(["lxc", "exec", nombre, "--", "bash", "-c", f"echo '{config_mongo}' > /etc/mongod.conf"])
-        
-    #     # Reiniciar MongoDB
-    #     subprocess.run(["lxc", "exec", nombre, "--", "systemctl", "restart", "mongodb"])
-        
-    #     # Configurar servicio
-    #     setup_service(nombre, "mongodb")
-        
-    #     if not local:
-    #         configurar_bd_remota(nombre, ip_remota)
-        
-    #     logging.info("Base de datos configurada correctamente")
-        
-    # except subprocess.CalledProcessError as e:
-    #     logging.error(f"Error al configurar la base de datos: {e}")
-
-
+# 3. instalar HAProxy en el contenedor lb
 def configurar_balanceador(): 
 
     # Configurar balanceador (con HAProxy)  
     print(f"Configurando balanceador lb..")
     subprocess.run(["lxc", "exec", "lb", "bash"])
-    # Asegurar que HAProxy esté instalado
+    # Asegurar que HAProxy este instalado
     subprocess.run(["lxc", "exec", "lb", "--", "apt", "update"])
     subprocess.run(["lxc", "exec", "lb", "--", "apt", "install", "-y", "haproxy"])
 
 
-
+# 4. configurar HAProxy con backend dinamico segun el numero de servidores
 def configurar_haproxy(num_servidores):
     """Configura HAProxy dinámicamente según el número de servidores"""
 
