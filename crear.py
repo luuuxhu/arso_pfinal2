@@ -101,7 +101,7 @@ def configurar_redes(n: int):
     if not funciones_utiles.existe_bridge("lxdbr1"):
         try:
             subprocess.run(["lxc", "network", "create", "lxdbr1", 
-                            "ipv4.address=134.3.1.1/24", "ipv4.nat=false", 
+                            "ipv4.address=134.3.1.1/24", "ipv4.nat=true", 
                             "ipv6.address=none", "ipv6.nat=false",
                             "dns.domain=lxd", "dns.mode=none"])
             logging.info("Bridge lxdbr1 creado correctamente.")
@@ -111,7 +111,7 @@ def configurar_redes(n: int):
     else:
         logging.info("El bridge lxdbr1 ya existe.")
         subprocess.run(["lxc", "network", "set", "lxdbr1", 
-                        "ipv4.address=134.3.1.1/24", "ipv4.nat=false",
+                        "ipv4.address=134.3.1.1/24", "ipv4.nat=true",
                         "ipv6.address=none", "ipv6.nat=false",
                         "dns.domain=lxd", "dns.mode=none"])
 
@@ -127,7 +127,7 @@ def configurar_redes(n: int):
     # else:
         # logging.info("El bridge lxdbr0 ya existe.")
     subprocess.run(["lxc", "network", "set", "lxdbr0", 
-                    "ipv4.address=134.3.0.1/24", "ipv4.nat=false",
+                    "ipv4.address=134.3.0.1/24", "ipv4.nat=true",
                     "ipv6.address=none", "ipv6.nat=false",
                     "dns.domain=lxd", "dns.mode=none"])
 

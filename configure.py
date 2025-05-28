@@ -32,7 +32,8 @@ def configurar_basedatos():
     if existe_contenedor(nombre):
         # Instalar MongoDB
         logging.info("Instalando MongoDB...")
-        # subprocess.run(["lxc", "exec", nombre, "--", "apt", "update"]) # si no funciona es SU CULPA
+
+        subprocess.run(["lxc", "exec", nombre, "--", "apt", "update"])
         subprocess.run(["lxc", "exec", nombre, "--", "apt", "install", "-y", "mongodb"])
 
         # Configurar MongoDB (bind IP y reinicio)
@@ -44,7 +45,7 @@ def configurar_basedatos():
             "s/bind_ip = 127.0.0.1/bind_ip = 127.0.0.1,134.3.0.20/",  # IP de db en la red según práctica 6.2
             "/etc/mongodb.conf"
         ])
-        subprocess.run(["lxc", "restart", nombre]) 
+        subprocess.run(["lxc", "restart", nombre])
     else: logging.error(f"El contenedor {nombre} no existe. No se puede configurar.")
 
 
@@ -55,15 +56,15 @@ def configurar_servidores(n): # node.js
     """
 
     
-    # Configurar base de datos en contenedor db 
-    print(f"Configurando base de datos en MongoDB...")
-    subprocess.run(["lxc", "file", "push", "install.sh", "db/root/"])
-    subprocess.run(["lxc", "exec", "db", "--", "bash", "/root/install.sh"])
+    # # Configurar base de datos en contenedor db 
+    # print(f"Configurando base de datos en MongoDB...")
+    # subprocess.run(["lxc", "file", "push", "install.sh", "db/root/"])
+    # subprocess.run(["lxc", "exec", "db", "--", "bash", "/root/install.sh"])
 
-    try:
-        subprocess.run(["lxc", "exec", "db", "restart", "mongodb"], check=True)
-    except subprocess.CalledProcessError:
-        logging.error("¡Error al reiniciar MongoDB!")
+    # try:
+    #     subprocess.run(["lxc", "exec", "db", "restart", "mongod"], check=True)
+    # except subprocess.CalledProcessError:
+    #     logging.error("¡Error al reiniciar MongoDB!")
 
     instalar_app_en_servidores()
 
@@ -72,7 +73,6 @@ def configurar_balanceador():
 
     # Configurar balanceador (con HAProxy)  
     print(f"Configurando balanceador lb..")
-    subprocess.run(["lxc", "exec", "lb", "bash"])
     # Asegurar que HAProxy este instalado
     subprocess.run(["lxc", "exec", "lb", "--", "apt", "update"])
     subprocess.run(["lxc", "exec", "lb", "--", "apt", "install", "-y", "haproxy"])

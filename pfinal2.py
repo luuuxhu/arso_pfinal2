@@ -107,8 +107,9 @@ if accion == "configure_basic":
             logging.error("El número de servidores debe ser un entero.")
             sys.exit(1)
 
-    configurar_servidores(servidores)
     configurar_basedatos()
+    # configurar_servidores(servidores)
+    
     configurar_balanceador()
     configurar_haproxy(servidores)
 
