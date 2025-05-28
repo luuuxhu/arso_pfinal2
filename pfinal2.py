@@ -9,11 +9,13 @@ import logging
 import time
 from crear import crear_escenario
 from crear import crear_contenedor
-from configure import configurar_escenario
 from list_contenedores import list
 from start_escenario import start
 from stop_escenario import stop
 from delete_escenario import delete
+from configurar_remoto import conectarB, obtener_ipB
+from configurar_local import configA, bridge_remoto
+from configure import configurar_servidores, configurar_basedatos, configurar_balanceador, configurar_haproxy
 
 accion = sys.argv[1]  # esto va a ser el primer argumento del comando --> se usa abajo en el main
 
@@ -45,6 +47,7 @@ Comandos disponibles:
  python3 pfinal1.py list                       - Listar contenedores
  python3 pfinal1.py delete                     - Eliminar todos los componentes del escenario o uno en concreto. Siga las instrucciones.
  python3 pfinal2.py configure                  - Configurar app web, base de datos y balanceador
+ python3 pfinal2.py stop                       - Parar todos los componentes del escenario o uno en concreto. Siga las instrucciones.
 
 
 """)
@@ -86,8 +89,35 @@ if accion == "help":
     mostrar_ayuda()
 
 # PRACTICA 2
-if accion == "configure":
-    configurar_escenario()
+
+if accion == "configure_basic":
+    servidores = 2  # Valor por defecto
+    if len(sys.argv) == 3:
+        try:
+            servidores = int(sys.argv[2])
+            if not (1 <= servidores <= 5):
+                logging.error("El número de servidores debe estar entre 1 y 5.")
+                print("El número de servidores debe estar entre 1 y 5.")
+                sys.exit(1)
+        except ValueError:
+            logging.error("El número de servidores debe ser un entero.")
+            sys.exit(1)
+
+    configurar_servidores(servidores)
+    configurar_basedatos()
+    configurar_balanceador()
+    configurar_haproxy(servidores)
+
+
+if accion == "configure_local":
+    configA()
+    bridge_remoto()
+
+if accion == "verIP":
+    obtener_ipB()
+    
+if accion == "configure_remoto":
+    conectarB()
 
 
 # configure.py creo que para parte opcional...

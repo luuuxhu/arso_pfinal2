@@ -89,7 +89,8 @@ def crear_contenedor():
         print(f"Creando el contenedor: {nombre_contenedor} ...")
         subprocess.run(["lxc", "init", "ubuntu:20.04", nombre_contenedor])
         logging.info("El contenedor se ha creado correctamente.")
-
+        with open(ARCHIVO_CONFIG, "a") as file:
+            file.write(f"\n{nombre_contenedor}")
 
 ''' configura la infraestructura de red para el escenario 
     n --> número de servidores '''
@@ -147,7 +148,7 @@ def configurar_redes(n: int):
     
         # P2: Base de datos: que se configure con direccion IP
         logging.info("Configurando la red para la base de datos...")
-        subprocess.run(["lxc", "network", "attach", "lxdbr1", "db", "eth0"])
+        subprocess.run(["lxc", "network", "attach", "lxdbr0", "db", "eth0"])
         subprocess.run(["lxc", "config", "device", "set", "db", "eth0", "ipv4.address", "134.3.0.20"])
 
     except subprocess.CalledProcessError as e:

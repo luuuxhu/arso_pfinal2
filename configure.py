@@ -146,7 +146,7 @@ backend nodejs_servers
     # 4. Reiniciar HAProxy
     # subprocess.run(["lxc", "exec", "lb", "restart", "haproxy"])
     
-    subprocess.run(["service", "haproxy", "start"])
+    subprocess.run(["lxc", "exec", "lb", "service", "haproxy", "start"])
 
 
 

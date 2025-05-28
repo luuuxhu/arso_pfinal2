@@ -1,12 +1,16 @@
 import subprocess
 import logging
 import time
+import os
 
 ARCHIVO_CONFIG = "servidores.txt"
 ARCHIVO_RUN = "contenedores_running.txt"
 
 def start():
-
+    if not os.path.exists(ARCHIVO_RUN):
+        with open(ARCHIVO_RUN, "w") as file:
+            pass 
+    
     with open(ARCHIVO_CONFIG, "r") as file:
         contenedores = [line.strip() for line in file.readlines()]
 
@@ -43,7 +47,7 @@ def start():
                 time.sleep(2)
                 subprocess.Popen(["xterm", "-e", "lxc exec " + ans + " bash"])
 
-                with open(ARCHIVO_RUN, "w") as file:
+                with open(ARCHIVO_RUN, "a") as file:
                     file.write(f"{ans}\n")
 
         elif ans == "s" or ans == "S":
