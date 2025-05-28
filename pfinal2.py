@@ -16,6 +16,7 @@ from delete_escenario import delete
 from configurar_remoto import conectarB, obtener_ipB
 from configurar_local import configA, bridge_remoto
 from configure import configurar_servidores, configurar_basedatos, configurar_balanceador, configurar_haproxy
+from instalar_node_servidores import instalar_app_en_servidores
 
 accion = sys.argv[1]  # esto va a ser el primer argumento del comando --> se usa abajo en el main
 
@@ -89,6 +90,9 @@ if accion == "help":
     mostrar_ayuda()
 
 # PRACTICA 2
+
+if accion == "instalar_node":
+    instalar_app_en_servidores()
 
 if accion == "configure_basic":
     servidores = 2  # Valor por defecto

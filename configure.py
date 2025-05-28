@@ -30,7 +30,7 @@ def configurar_servidores(n): # node.js
        
 
     try:
-        subprocess.run(["lxc", "exec", "db", "--", "systemctl", "restart", "mongodb"], check=True)
+        subprocess.run(["lxc", "exec", "db", "restart", "mongodb"], check=True)
     except subprocess.CalledProcessError:
         logging.error("¡Error al reiniciar MongoDB!")
 
