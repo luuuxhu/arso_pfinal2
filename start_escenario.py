@@ -32,6 +32,7 @@ def start():
                     time.sleep(2)
                     with open(ARCHIVO_RUN, "a") as file:
                         file.write(f"{c}\n")
+            modificar_yaml() # habría que añadir control de errores a esto IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTEEEEEEE  PUES NO SALE
 
 
        # para iniciar SOLO UNO 
@@ -49,6 +50,10 @@ def start():
 
                 with open(ARCHIVO_RUN, "a") as file:
                     file.write(f"{ans}\n")
+
+                if ans == "lb":
+                    modificar_yaml()
+
 
         elif ans == "s" or ans == "S":
             return

@@ -3,6 +3,8 @@ import subprocess
 import logging
 import time
 import funciones_utiles
+from modificar_yaml import modificar_yaml
+
 
 # archivo donde vamos a guardar y leer la información del escenario
 ARCHIVO_CONFIG = "servidores.txt"

@@ -1,6 +1,8 @@
 import subprocess
 import logging
 
+ARCHIVO_CONFIG = "servidores.txt"
+
 # verifica si un contenedor existe
 def existe_contenedor(nombre):
 
@@ -25,3 +27,16 @@ def existe_bridge(nombre):
     except subprocess.CalledProcessError as e:
         logging.error(f"Error al verificar el bridge {nombre}: {e}")
         return False
+
+
+def contar_servidores():
+    with open(ARCHIVO_CONFIG, "r") as f:
+        lineas = f.readlines()
+
+    # Filtrar solo los contenedores que no sean cl, db ni lb
+    servidores = [
+        linea for linea in lineas
+        if not any(nombre in linea.strip() for nombre in ("cl", "db", "lb"))
+    ]
+
+    return len(servidores)
